@@ -185,7 +185,7 @@ def calc_match_values(dataset, df, n_min_dist, nn):
 
 def load_traversal_path(data_path):
     """Read the file and convert to mercator projection"""
-    df = gpd.read_file(traversal_path)
+    df = gpd.read_file(data_path)
     # Convert to meters
     return df.to_crs(epsg=3857)
 
