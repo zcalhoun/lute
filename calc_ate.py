@@ -87,7 +87,7 @@ def get_matches(treatment, control, match_radius, distance_metric):
         if len(valid_controls) == 0:
             continue
         else:
-            treatment_vals.append(label)
+            treatment_vals.append(t_temp)
 
         # Get the closest control via the distance metric
         control_val = get_closest_control(valid_controls, t_img, distance_metric)
