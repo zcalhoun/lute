@@ -8,7 +8,7 @@ def load(name):
 
         return train, test
     elif name == "pm_train_only":
-        from matching import MatchingDataset
+        from .matching import MatchingDataset
 
         # We only need the training data
         train = MatchingDataset("/datacommons/carlsonlab/zdc6/cs590/land_use/train")
