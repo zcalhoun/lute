@@ -17,7 +17,7 @@ def main(args):
     # Load images
     dataset = Datasets.load("pm_train_only")
     # Load traversal path
-    df = load_traversal_path(args.data_dir)
+    df = load_traversal_path(args.traversal_data)
 
     ##################
     #  Set up parameters to checkout
@@ -39,7 +39,7 @@ def main(args):
     control_idx = 2  # id used for trees (this should not change)
     treatment_pctg = [0.9]  # percentage covered by treatment
     control_pctg = [0.9]  # percentage covered by control
-    match_radius = [0.5]
+    match_radius = [1]
     # Iterate over the prognostic dependent variables
     for n_min_dist, nn in product(neighborhood_min_dist, num_neighbors):
         print(f"Neighborhood min dist: {n_min_dist}, Num neighbors: {nn}")
@@ -102,7 +102,10 @@ def get_closest_control(control_pool, t_img, distance_metric):
     best_control = None
 
     # TODO -- add more distance metrics here
-    distance_metric = hamming_loss
+    if distance_metric == "hamming":
+        distance_metric = hamming_loss
+    else:
+        raise ValueError(f"Distance metric {distance_metric} not recognized.")
 
     for c_img, _, c_temp, _ in control_pool:
         sim = distance_metric(t_img.flatten(), c_img.flatten())
@@ -192,11 +195,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Calculate ATE")
 
     # Argument for where to load data
-    parser.add_argument("--traversal_data", type=str)
+    parser.add_argument(
+        "--traversal_data",
+        type=str,
+        default="/datacommons/carlsonlab/zdc6/uhi/data/traverses/pm_trav.shp",
+    )
     # Argument for where to dump results
     parser.add_argument("--results_dir", type=str)
     # Argument for distance metric
-    parser.add_argument("--distance_metric", type=str)
+    parser.add_argument("--distance_metric", type=str, default="hamming")
 
     # Retrieve the arguments
     args = parser.parse_args()
