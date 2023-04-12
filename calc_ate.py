@@ -66,7 +66,7 @@ def main(args):
                 treatment, control, match_radius, args.distance_metric
             )
 
-            ate = np.mean(treatmetn_vals) - np.mean(control_vals)
+            ate = np.mean(treatment_vals) - np.mean(control_vals)
 
             print(f"ATE: {ate}")
 
