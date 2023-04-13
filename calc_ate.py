@@ -29,18 +29,30 @@ def main(args):
     # neighbors that are closer to a specific distance, as
     # these neighbors are more directly influenced by
     # the covariates.
-    neighborhood_min_dist = [600]
+    neighborhood_min_dist = [500, 550, 600, 650, 700, 750, 800, 850, 900]
 
     # Number of neighbors to average over.
-    num_neighbors = [10]
+    num_neighbors = [5, 10, 15, 20, 25]
 
     # Treatment/control values
-    distance = [10]  # box of 2*distance x 2*distance in the center
+    distance = [5, 10, 20, 40]  # box of 2*distance x 2*distance in the center
     treatment_idx = 0  # id used for concrete (this should not change)
     control_idx = 2  # id used for trees (this should not change)
-    treatment_pctg = [0.9]  # percentage covered by treatment
-    control_pctg = [0.9]  # percentage covered by control
-    match_radius = [1]
+    treatment_pctg = [0.6, 0.7, 0.8, 0.9]  # percentage covered by treatment
+    control_pctg = [0.6, 0.7, 0.8, 0.9]  # percentage covered by control
+    match_radius = [0.5, 1, 1.5, 2]
+
+    # Get the total number of trials to run:
+    num_trials = (
+        len(neighborhood_min_dist)
+        * len(num_neighbors)
+        * len(distance)
+        * len(treatment_pctg)
+        * len(control_pctg)
+        * len(match_radius)
+    )
+    print(f"Total number of trials: {num_trials}")
+    counter = 1
 
     # Create to store results
     with open(args.results_path, "w", newline="") as f:
@@ -55,7 +67,8 @@ def main(args):
                 "Treatment %",
                 "Control %",
                 "Match Radius",
-                "Treatment Count" "Control Count",
+                "Treatment Count",
+                "Control Count",
                 "ATE",
                 "TE Std",
                 "Average Match Distance",
@@ -72,7 +85,7 @@ def main(args):
         ):
             # Get the treatment and controls
             print(f"Dist: {dist}, Treatment %: {t_pctg}, Control %: {c_pctg}")
-            print("Creating treatment and control groups")
+            print(f"Running trial {counter} of {num_trials}")
             treatment, control = create_treatment_and_control_groups(
                 dist,
                 treatment_idx,
@@ -83,8 +96,8 @@ def main(args):
                 dataset,
             )
 
-            print("Pre-matching treatment size: ", len(treatment))
-            print("Pre-matching control size: ", len(control))
+            print("\tPre-matching treatment size: ", len(treatment))
+            print("\tPre-matching control size: ", len(control))
 
             treatment_vals, control_vals, match_distances = get_matches(
                 treatment, control, match_rad, args.distance_metric
@@ -110,7 +123,8 @@ def main(args):
                         np.mean(match_distances),
                     ]
                 )
-            print(f"ATE: {ate}")
+            print("\tATE: {ate}")
+            counter += 1
 
 
 def get_matches(treatment, control, match_radius, distance_metric):
