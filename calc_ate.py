@@ -1,5 +1,6 @@
 # Import all dependencies
 import os
+import csv
 import numpy as np
 import argparse
 from functools import partial
@@ -41,12 +42,25 @@ def main(args):
     control_pctg = [0.9]  # percentage covered by control
     match_radius = [1]
 
-    # Create the output file
-    # TODO: Make folder if it doesn't exist
-    with open(args.output_csv, 'w', newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(['Neighborhood min dist', 'Num neighbors', 'Distance metric', 'Distance', 'Treatment idx', 'Control idx', 'Treatment %', 'Control %', 'Match radius', 'ATE'])
+    # Create to store results
+    with open(args.results_path, "w", newline="") as f:
+        writer = csv.writer(f, delimiter=",")
 
+        # Write the header
+        writer.writerow(
+            [
+                "Neighborhood min dist",
+                "Num neighbors",
+                "Treatment/Control Radius",
+                "Treatment %",
+                "Control %",
+                "Match Radius",
+                "Treatment Count" "Control Count",
+                "ATE",
+                "TE Std",
+                "Average Match Distance",
+            ]
+        )
 
     # Iterate over the prognostic dependent variables
     for n_min_dist, nn in product(neighborhood_min_dist, num_neighbors):
@@ -70,18 +84,31 @@ def main(args):
             print("Pre-matching treatment size: ", len(treatment))
             print("Pre-matching control size: ", len(control))
 
-            treatment_vals, control_vals = get_matches(
+            treatment_vals, control_vals, match_distances = get_matches(
                 treatment, control, match_radius, args.distance_metric
             )
 
             ate = np.mean(treatment_vals) - np.mean(control_vals)
-
+            ate_std = np.std(np.array(treatment_vals) - np.array(control_vals))
+            # Record the results
+            with open(args.results_path, "a", newline="") as f:
+                writer = csv.writer(f, delimiter=",")
+                writer.writerow(
+                    [
+                        n_min_dist,
+                        nn,
+                        dist,
+                        t_pctg,
+                        c_pctg,
+                        match_radius,
+                        len(treatment_vals),
+                        len(control_vals),
+                        ate,
+                        ate_std,
+                        np.mean(match_distances),
+                    ]
+                )
             print(f"ATE: {ate}")
-
-            with open(args.output_csv, 'w', newline='') as csvfile:
-                writer = csv.writer(csvfile)
-                writer.writerow([n_min_dist, nn, args.distance_metric, dist, treatment_idx, control_idx, t_pctg, c_pctg, match_radius[0], ate])
-
 
 
 def get_matches(treatment, control, match_radius, distance_metric):
@@ -89,6 +116,7 @@ def get_matches(treatment, control, match_radius, distance_metric):
     # Set up the treatment and control values
     treatment_vals = []
     control_vals = []
+    match_distance = []  # Record the average match distance
 
     for t_img, _, t_temp, match_val in treatment:
         # Create control function and implement as a filter
@@ -103,10 +131,12 @@ def get_matches(treatment, control, match_radius, distance_metric):
             treatment_vals.append(t_temp)
 
         # Get the closest control via the distance metric
-        control_val = get_closest_control(valid_controls, t_img, distance_metric)
+        control_val, control_dist = get_closest_control(
+            valid_controls, t_img, distance_metric
+        )
         control_vals.append(control_val)
-
-    return treatment_vals, control_vals
+        match_distance.append(control_dist)
+    return treatment_vals, control_vals, match_distance
 
 
 def get_closest_control(control_pool, t_img, distance_metric):
@@ -127,7 +157,7 @@ def get_closest_control(control_pool, t_img, distance_metric):
             best_dist = sim
             best_control = c_temp
 
-    return best_control
+    return best_control, best_dist
 
 
 def filter_control_matches_by_radius(radius, treatment_val, control_val):
@@ -214,10 +244,9 @@ if __name__ == "__main__":
         default="/datacommons/carlsonlab/zdc6/uhi/data/traverses/pm_trav.shp",
     )
     # Argument for where to dump results
-    parser.add_argument("--results_dir", type=str)
+    parser.add_argument("--results_path", type=str, default="./ate_results.csv")
     # Argument for distance metric
     parser.add_argument("--distance_metric", type=str, default="hamming")
-    parser.add_argument("--output_csv", type=str, default="./ate.csv")
 
     # Retrieve the arguments
     args = parser.parse_args()
