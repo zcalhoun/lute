@@ -29,7 +29,7 @@ def main(args):
     # neighbors that are closer to a specific distance, as
     # these neighbors are more directly influenced by
     # the covariates.
-    neighborhood_min_dist = [500, 550, 600, 650, 700, 750, 800, 850, 900]
+    neighborhood_min_dist = [args.neighborhood_min_dist]
 
     # Number of neighbors to average over.
     num_neighbors = [5, 10, 15, 20, 25]
@@ -263,6 +263,8 @@ if __name__ == "__main__":
     parser.add_argument("--results_path", type=str, default="./ate_results.csv")
     # Argument for distance metric
     parser.add_argument("--distance_metric", type=str, default="hamming")
+
+    parser.add_argument("--neighborhood_min_dist", type=int, default=550)
 
     # Retrieve the arguments
     args = parser.parse_args()
