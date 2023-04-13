@@ -67,7 +67,9 @@ def main(args):
         print(f"Neighborhood min dist: {n_min_dist}, Num neighbors: {nn}")
         # Calculate the match values
         match_values = calc_match_values(dataset, df, n_min_dist, nn)
-        for dist, t_pctg, c_pctg in product(distance, treatment_pctg, control_pctg):
+        for dist, t_pctg, c_pctg, match_rad in product(
+            distance, treatment_pctg, control_pctg, match_radius
+        ):
             # Get the treatment and controls
             print(f"Dist: {dist}, Treatment %: {t_pctg}, Control %: {c_pctg}")
             print("Creating treatment and control groups")
@@ -85,7 +87,7 @@ def main(args):
             print("Pre-matching control size: ", len(control))
 
             treatment_vals, control_vals, match_distances = get_matches(
-                treatment, control, match_radius, args.distance_metric
+                treatment, control, match_rad, args.distance_metric
             )
 
             ate = np.mean(treatment_vals) - np.mean(control_vals)
@@ -100,7 +102,7 @@ def main(args):
                         dist,
                         t_pctg,
                         c_pctg,
-                        match_radius,
+                        match_rad,
                         len(treatment_vals),
                         len(control_vals),
                         ate,
