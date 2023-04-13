@@ -40,6 +40,14 @@ def main(args):
     treatment_pctg = [0.9]  # percentage covered by treatment
     control_pctg = [0.9]  # percentage covered by control
     match_radius = [1]
+
+    # Create the output file
+    # TODO: Make folder if it doesn't exist
+    with open(args.output_csv, 'w', newline='') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(['Neighborhood min dist', 'Num neighbors', 'Distance metric', 'Distance', 'Treatment idx', 'Control idx', 'Treatment %', 'Control %', 'Match radius', 'ATE'])
+
+
     # Iterate over the prognostic dependent variables
     for n_min_dist, nn in product(neighborhood_min_dist, num_neighbors):
         print(f"Neighborhood min dist: {n_min_dist}, Num neighbors: {nn}")
@@ -69,6 +77,11 @@ def main(args):
             ate = np.mean(treatment_vals) - np.mean(control_vals)
 
             print(f"ATE: {ate}")
+
+            with open(args.output_csv, 'w', newline='') as csvfile:
+                writer = csv.writer(csvfile)
+                writer.writerow([n_min_dist, nn, args.distance_metric, dist, treatment_idx, control_idx, t_pctg, c_pctg, match_radius[0], ate])
+
 
 
 def get_matches(treatment, control, match_radius, distance_metric):
@@ -204,6 +217,7 @@ if __name__ == "__main__":
     parser.add_argument("--results_dir", type=str)
     # Argument for distance metric
     parser.add_argument("--distance_metric", type=str, default="hamming")
+    parser.add_argument("--output_csv", type=str, default="./ate.csv")
 
     # Retrieve the arguments
     args = parser.parse_args()
