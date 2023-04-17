@@ -12,6 +12,12 @@ import geopandas as gpd
 from scipy.spatial.distance import hamming as hamming_loss
 
 import Datasets
+from distance_metrics import (
+    weighted_hamming_wrapper,
+    jensenshannon_wrapper,
+    kl_divergence_wrapper,
+    jaccard_distance_wrapper,
+)
 
 
 def main(args):
@@ -24,6 +30,10 @@ def main(args):
     #  Set up parameters to checkout
     ##################
 
+    results_dir = os.path.dirname(args.results_path)
+    if not os.path.exists(results_dir):
+        os.makedirs(results_dir)
+
     # This is the minimum distance from which to retrieve
     # the nearest neighbors. We do not want to get
     # neighbors that are closer to a specific distance, as
@@ -35,7 +45,7 @@ def main(args):
     num_neighbors = [5, 10, 15, 20, 25]
 
     # Treatment/control values
-    distance = [5, 10, 20, 40]  # box of 2*distance x 2*distance in the center
+    distance = [20, 40, 80]  # box of 2*distance x 2*distance in the center
     treatment_idx = 0  # id used for concrete (this should not change)
     control_idx = 2  # id used for trees (this should not change)
     treatment_pctg = [0.6, 0.7, 0.8, 0.9]  # percentage covered by treatment
@@ -163,6 +173,14 @@ def get_closest_control(control_pool, t_img, distance_metric):
     # TODO -- add more distance metrics here
     if distance_metric == "hamming":
         distance_metric = hamming_loss
+    elif distance_metric == "jaccard":
+        distance_metric = jaccard_distance_wrapper
+    elif distance_metric == "weighted_hamming":
+        distance_metric = weighted_hamming_wrapper
+    elif distance_metric == "kl_divergence":
+        distance_metric = kl_divergence_wrapper
+    elif distance_metric == "jensenshannon":
+        distance_metric = jensenshannon_wrapper
     else:
         raise ValueError(f"Distance metric {distance_metric} not recognized.")
 

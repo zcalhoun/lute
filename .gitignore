@@ -2,3 +2,6 @@
 */.ipynb_checkpoints
 Datasets/__pycache__/
 ate_results.csv
+*.err
+*.out
+*.csv
