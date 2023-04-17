@@ -30,9 +30,9 @@ def main(args):
     #  Set up parameters to checkout
     ##################
 
-    results_dir = os.path.dirname(args.results_path)
+    results_dir = os.path.dirname(args.results_path) + "/"
     if not os.path.exists(results_dir):
-        os.makedirs(results_dir)
+        os.makedirs(results_dir, exist_ok=True)
 
     # This is the minimum distance from which to retrieve
     # the nearest neighbors. We do not want to get

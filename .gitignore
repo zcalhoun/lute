@@ -5,3 +5,4 @@ ate_results.csv
 *.err
 *.out
 *.csv
+__pycache__/

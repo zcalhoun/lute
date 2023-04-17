@@ -4,7 +4,7 @@ from scipy.stats import entropy
 from sklearn.metrics import jaccard_score
 import numpy as np
 
-def weighted_hamming_wrapper(n = 256):
+def weighted_hamming_wrapper(x_input, y_input, n = 256):
     n = 256
     center = n // 2
 
@@ -24,7 +24,7 @@ def weighted_hamming_wrapper(n = 256):
     # Stack the weight matrix along the third axis to create a 256 x 256 x 4 array
     stacked_weights = np.stack([weight_matrix] * 4, axis=-1)
     
-    return hamming_loss(x, y, w=stacked_weights.flatten())
+    return hamming_loss(x_input, y_input, w=stacked_weights.flatten())
 
 def jensenshannon_wrapper(x, y):
 #     land_use_1 = x.reshape(4, 256, 256)
