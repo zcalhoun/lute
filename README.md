@@ -2,7 +2,7 @@
 Land Use Temperature Effect
 
 
-# To trigger matching scriptscript
+# To trigger matching script
 Request a CPU in interactive mode (no GPU needed). Make sure you request a high amount of memory.
 ```bash
 srun --mem=64G --pty bash -i
